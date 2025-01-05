@@ -18,7 +18,8 @@ func main() {
 	}
 	defer db.Close()
 
-	authService := auth.NewAuthService([]byte(cfg.SecretKey))
+	authRepository := auth.NewAuthRepository(db)
+	authService := auth.NewAuthService([]byte(cfg.SecretKey), authRepository)
 	authHandler := auth.NewAuthHandler(authService)
 
 	router := routes.SetupRouter(authHandler)
