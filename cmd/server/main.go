@@ -22,7 +22,11 @@ func main() {
 	authService := auth.NewAuthService([]byte(cfg.SecretKey), authRepository)
 	authHandler := auth.NewAuthHandler(authService)
 
-	router := routes.SetupRouter(authHandler)
+	houseRepository := house.NewHouseRepository(db)
+	houseService := house.NewHouseService(houseRepository)
+	houseHandler := house.NewHouseHandler(houseService)
+
+	router := routes.SetupRouter(authHandler, []byte(cfg.SecretKey))
 
 	fmt.Println("Server is running on port 8080")
 	if err := http.ListenAndServe(":8080", router); err != nil {
