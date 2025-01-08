@@ -4,6 +4,7 @@ import (
 	"backend-bootcamp-assignment-2024/internal/auth"
 	"backend-bootcamp-assignment-2024/internal/config"
 	"backend-bootcamp-assignment-2024/internal/db"
+	"backend-bootcamp-assignment-2024/internal/house"
 	"backend-bootcamp-assignment-2024/internal/routes"
 	"fmt"
 	"log"
@@ -26,7 +27,7 @@ func main() {
 	houseService := house.NewHouseService(houseRepository)
 	houseHandler := house.NewHouseHandler(houseService)
 
-	router := routes.SetupRouter(authHandler, []byte(cfg.SecretKey))
+	router := routes.SetupRouter(authHandler, []byte(cfg.SecretKey), houseHandler)
 
 	fmt.Println("Server is running on port 8080")
 	if err := http.ListenAndServe(":8080", router); err != nil {
