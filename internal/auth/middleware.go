@@ -11,8 +11,8 @@ import (
 )
 
 type JWTClaims struct {
-	UserID string `json:"user_id"`
-	Type   string `json:"type"`
+	exp  int64  `json:"exp"`
+	Type string `json:"user_type"`
 	jwt.RegisteredClaims
 }
 
@@ -21,23 +21,23 @@ func AuthMiddleware(secretKey []byte) func(next http.Handler) http.Handler {
 		return http.HandlerFunc(func(w http.ResponseWriter, r *http.Request) {
 			token := r.Header.Get("Authorization")
 			if token == "" {
-				http.Error(w, "Unauthorized", http.StatusUnauthorized)
+				http.Error(w, "Unauthorized dsd", http.StatusUnauthorized)
 				return
 			}
 			headerPart := strings.Split(token, " ")
 			if len(headerPart) != 2 || headerPart[0] != "Bearer" {
-				http.Error(w, "Unauthorized", http.StatusUnauthorized)
+				http.Error(w, "Unauthorized vav", http.StatusUnauthorized)
 				return
 			}
 			tokenString := headerPart[1]
 
 			claims, err := validateToken(tokenString, secretKey)
 			if err != nil {
-				http.Error(w, "Unauthorized", http.StatusUnauthorized)
+				http.Error(w, "Unauthorized huz", http.StatusUnauthorized)
 				return
 			}
 
-			ctx := context.WithValue(r.Context(), "user_id", claims.UserID)
+			ctx := context.WithValue(r.Context(), "user_id", claims.exp)
 			ctx = context.WithValue(ctx, "user_type", claims.Type)
 			next.ServeHTTP(w, r.WithContext(ctx))
 		})
@@ -65,9 +65,13 @@ func validateToken(tokenString string, secretKey []byte) (*JWTClaims, error) {
 
 func ModeratorMiddleware(next http.Handler) http.Handler {
 	return http.HandlerFunc(func(w http.ResponseWriter, r *http.Request) {
-		userType := r.Context().Value("user_type").(string)
+		userType, ok := r.Context().Value("user_type").(string)
+		if !ok {
+			http.Error(w, "Forbidden", http.StatusForbidden)
+			return
+		}
 		if userType != "moderator" {
-			http.Error(w, "forbidden", http.StatusForbidden)
+			http.Error(w, "Forbidden", http.StatusForbidden)
 			return
 		}
 		next.ServeHTTP(w, r)
