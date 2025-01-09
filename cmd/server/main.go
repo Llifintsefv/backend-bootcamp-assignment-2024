@@ -30,7 +30,7 @@ func main() {
 	router := routes.SetupRouter(authHandler, []byte(cfg.SecretKey), houseHandler)
 
 	fmt.Println("Server is running on port 8080")
-	if err := http.ListenAndServe(":8080", router); err != nil {
+	if err := http.ListenAndServe(cfg.Port, router); err != nil {
 		log.Fatal(err)
 	}
 }

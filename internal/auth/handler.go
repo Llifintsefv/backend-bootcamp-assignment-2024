@@ -4,6 +4,8 @@ import (
 	"backend-bootcamp-assignment-2024/dto"
 	"encoding/json"
 	"net/http"
+
+	"github.com/google/uuid"
 )
 
 type AuthHandler struct {
@@ -34,8 +36,9 @@ func (h *AuthHandler) DummyLoginHandler(w http.ResponseWriter, r *http.Request) 
 		return
 	}
 
-	json.NewEncoder(w).Encode(map[string]string{"token": token})
 	w.WriteHeader(http.StatusOK)
+	json.NewEncoder(w).Encode(map[string]string{"token": token})
+
 }
 
 func (h *AuthHandler) Register(w http.ResponseWriter, r *http.Request) {
@@ -44,7 +47,12 @@ func (h *AuthHandler) Register(w http.ResponseWriter, r *http.Request) {
 	err := json.NewDecoder(r.Body).Decode(&req)
 
 	if err != nil {
-		http.Error(w, "", http.StatusBadRequest)
+		http.Error(w, "Invalid request body", http.StatusBadRequest)
+		return
+	}
+
+	if req.Password == nil {
+		http.Error(w, "Invalid request body", http.StatusBadRequest)
 		return
 	}
 	ctx := r.Context()
@@ -65,7 +73,12 @@ func (h *AuthHandler) Login(w http.ResponseWriter, r *http.Request) {
 	err := json.NewDecoder(r.Body).Decode(&req)
 
 	if err != nil {
-		http.Error(w, "", http.StatusBadRequest)
+		http.Error(w, "invalid request body", http.StatusBadRequest)
+		return
+	}
+
+	if req.Id == &uuid.Nil || req.Password == nil {
+		http.Error(w, "invalid request body", http.StatusBadRequest)
 		return
 	}
 
@@ -78,6 +91,7 @@ func (h *AuthHandler) Login(w http.ResponseWriter, r *http.Request) {
 		return
 	}
 
-	json.NewEncoder(w).Encode(map[string]string{"token": token})
 	w.WriteHeader(http.StatusOK)
+	json.NewEncoder(w).Encode(map[string]string{"token": token})
+
 }

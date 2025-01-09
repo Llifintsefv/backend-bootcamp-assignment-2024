@@ -17,7 +17,7 @@ type Config struct {
 func NewConfig() *Config {
 	err := godotenv.Load(".env")
 	if err != nil {
-		log.Panic("Error loading .env file")
+		log.Fatal("Error loading .env file")
 	}
 	dbHost := os.Getenv("DB_HOST")
 	dbPort := os.Getenv("DB_PORT")
