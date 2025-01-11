@@ -4,6 +4,8 @@ import (
 	"backend-bootcamp-assignment-2024/dto"
 	"encoding/json"
 	"net/http"
+
+	"github.com/gorilla/mux"
 )
 
 type FlatHandler struct {
@@ -15,25 +17,44 @@ func NewFlatHandler(flatService FlatService) *FlatHandler {
 }
 
 func (h *FlatHandler) CreateFlat(w http.ResponseWriter, r *http.Request){
-	var reg dto.PostFlatCreateJSONRequestBody
+	var req dto.PostFlatCreateJSONRequestBody
 
-	err := json.NewDecoder(r.Body).Decode(&reg)
+	err := json.NewDecoder(r.Body).Decode(&req)
 	if err != nil {
 
 	}
 
-	if reg.Price <= 0 || *reg.Rooms <= 0 {
-		http.Error(w, "", http.StatusBadRequest)
+	if req.Price <= 0 || *req.Rooms <= 0 {
+		http.Error(w, "invalid request body", http.StatusBadRequest)
 		return
 	}
 
 	ctx := r.Context()
 
-	flatCreateResponse,err := h.flatService.CreateFlat(ctx,reg)
+	flatCreateResponse,err := h.flatService.CreateFlat(ctx,req)
 	if err != nil {
-
+		http.Error(w, "internal server error", http.StatusInternalServerError)
+		return
 	}
 
 	w.WriteHeader(http.StatusCreated)
 	json.NewEncoder(w).Encode(flatCreateResponse)
+}
+
+func (h *FlatHandler) GetFlats(w http.ResponseWriter, r *http.Request){
+
+	params := mux.Vars(r)
+	
+	houseId := params["id"]
+
+	ctx := r.Context()
+
+	flatGetResponse,err := h.flatService.GetFlats(ctx,houseId)
+	if err != nil {
+		http.Error(w, "internal server error", http.StatusInternalServerError)
+		return
+	}
+
+	w.WriteHeader(http.StatusOK)
+	json.NewEncoder(w).Encode(flatGetResponse)
 }

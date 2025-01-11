@@ -45,6 +45,3 @@ func (h *HouseHandler) CreateHouse(w http.ResponseWriter, r *http.Request) {
 }
 
 
-// func GetHouse(w http.ResponseWriter, r *http.Request) {
-// 	var req dto.
-// }

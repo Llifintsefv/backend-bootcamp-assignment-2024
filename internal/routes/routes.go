@@ -14,10 +14,12 @@ func SetupRouter(authHandler *auth.AuthHandler, secretKey []byte, houseHandler *
 	router.HandleFunc("/dummyLogin", authHandler.DummyLoginHandler).Methods("GET")
 	router.HandleFunc("/login", authHandler.Login).Methods("POST")
 	router.HandleFunc("/register", authHandler.Register).Methods("POST")
+	router.HandleFunc("/flat/{id}",flatHandler.GetFlats).Methods("GET")
 
 	authRouter := router.PathPrefix("/").Subrouter()
 	authRouter.Use(auth.AuthMiddleware(secretKey))
 	authRouter.HandleFunc("/flat/create",flatHandler.CreateFlat).Methods("POST")
+
 
 
 	moderatorRouter := router.PathPrefix("/").Subrouter()

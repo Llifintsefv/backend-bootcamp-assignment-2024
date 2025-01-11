@@ -13,6 +13,7 @@ import (
 
 type FlatRepository interface {
 	CreateFlat(ctx context.Context,req dto.PostFlatCreateJSONRequestBody) (dto.Flat,error) 
+	GetFlats(ctx context.Context, houseId string) ([]dto.Flat,error)
 }
 
 type flatRepository struct{
@@ -53,4 +54,30 @@ func (r *flatRepository) CreateFlat(ctx context.Context,req dto.PostFlatCreateJS
 
 	return flat, nil
 
+}
+
+func (r *flatRepository) GetFlats(ctx context.Context, houseId string) ([]dto.Flat,error) {
+	var flats []dto.Flat
+	stmt,err := r.db.PrepareContext(ctx,"SELECT id,house_id,price,rooms,status FROM flats WHERE house_id = $1")
+	if err != nil {
+		return nil, fmt.Errorf("error preparing query: %w", err)
+	}
+
+	defer stmt.Close()
+
+	rows,err := stmt.QueryContext(ctx,houseId)
+	if err != nil {
+		return nil, fmt.Errorf("error executing query: %w", err)
+	}
+
+	for rows.Next() {
+		var flat dto.Flat
+		err = rows.Scan(&flat.Id,&flat.HouseId,&flat.Price,&flat.Rooms,&flat.Status)
+		if err != nil {
+			return nil, fmt.Errorf("error scanning row: %w", err)
+		}
+		flats = append(flats, flat)
+	}
+
+	return flats, nil
 }

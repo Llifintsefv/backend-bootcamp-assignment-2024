@@ -3,10 +3,12 @@ package flat
 import (
 	"backend-bootcamp-assignment-2024/dto"
 	"context"
+	"fmt"
 )
 
 type FlatService interface {
 	CreateFlat(ctx context.Context,req dto.PostFlatCreateJSONRequestBody) (dto.Flat,error) 
+	GetFlats(ctx context.Context, houseId string) ([]dto.Flat,error)
 }
 
 type flatService struct {
@@ -20,9 +22,20 @@ func NewFlatService(flatRepository FlatRepository) FlatService {
 func (s *flatService) CreateFlat(ctx context.Context,req dto.PostFlatCreateJSONRequestBody) (dto.Flat,error)  {
 		flat,err := s.flatRepository.CreateFlat(ctx,req)
 		if err != nil {
-
+			fmt.Errorf("error creating flat: %w", err)
+			return dto.Flat{},nil
 		}
 
 		return flat,nil
 }
 
+
+func (s *flatService) GetFlats(ctx context.Context, houseId string) ([]dto.Flat,error)  {
+	flats,err := s.flatRepository.GetFlats(ctx,houseId)
+	if err != nil {
+		fmt.Errorf("error getting flats: %w", err)
+		return []dto.Flat{}, err
+	}
+
+	return flats,nil
+}
