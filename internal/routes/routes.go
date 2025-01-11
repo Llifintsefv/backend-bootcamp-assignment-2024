@@ -2,12 +2,13 @@ package routes
 
 import (
 	"backend-bootcamp-assignment-2024/internal/auth"
+	"backend-bootcamp-assignment-2024/internal/flat"
 	"backend-bootcamp-assignment-2024/internal/house"
 
 	"github.com/gorilla/mux"
 )
 
-func SetupRouter(authHandler *auth.AuthHandler, secretKey []byte, houseHandler *house.HouseHandler) *mux.Router {
+func SetupRouter(authHandler *auth.AuthHandler, secretKey []byte, houseHandler *house.HouseHandler, flatHandler  *flat.FlatHandler) *mux.Router {
 	router := mux.NewRouter()
 
 	router.HandleFunc("/dummyLogin", authHandler.DummyLoginHandler).Methods("GET")
@@ -16,7 +17,8 @@ func SetupRouter(authHandler *auth.AuthHandler, secretKey []byte, houseHandler *
 
 	authRouter := router.PathPrefix("/").Subrouter()
 	authRouter.Use(auth.AuthMiddleware(secretKey))
-	//authRouter.HandleFunc("/house/{id}", houseHandler.GetHouseHandler).Methods("GET")
+	authRouter.HandleFunc("/flat/create",flatHandler.CreateFlat).Methods("POST")
+
 
 	moderatorRouter := router.PathPrefix("/").Subrouter()
 	moderatorRouter.Use(auth.AuthMiddleware(secretKey), auth.ModeratorMiddleware)

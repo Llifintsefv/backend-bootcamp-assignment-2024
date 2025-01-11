@@ -19,7 +19,6 @@ CREATE TABLE houses (
 CREATE TABLE flats (
     id SERIAL PRIMARY KEY,
     house_id INTEGER NOT NULL,
-    apartment_number INTEGER NOT NULL,
     price INTEGER NOT NULL,
     rooms INTEGER NOT NULL,
     status VARCHAR(50) NOT NULL CHECK (status IN ('created', 'approved', 'declined', 'on moderation')),

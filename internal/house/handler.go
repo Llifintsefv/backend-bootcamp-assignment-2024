@@ -43,3 +43,8 @@ func (h *HouseHandler) CreateHouse(w http.ResponseWriter, r *http.Request) {
 	json.NewEncoder(w).Encode(houseResponse)
 
 }
+
+
+// func GetHouse(w http.ResponseWriter, r *http.Request) {
+// 	var req dto.
+// }
