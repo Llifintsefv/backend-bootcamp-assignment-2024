@@ -19,12 +19,14 @@ func SetupRouter(authHandler *auth.AuthHandler, secretKey []byte, houseHandler *
 	authRouter := router.PathPrefix("/").Subrouter()
 	authRouter.Use(auth.AuthMiddleware(secretKey))
 	authRouter.HandleFunc("/flat/create",flatHandler.CreateFlat).Methods("POST")
+	
 
 
 
 	moderatorRouter := router.PathPrefix("/").Subrouter()
 	moderatorRouter.Use(auth.AuthMiddleware(secretKey), auth.ModeratorMiddleware)
 	moderatorRouter.HandleFunc("/house/create", houseHandler.CreateHouse).Methods("POST")
+	moderatorRouter.HandleFunc("/flat/update",flatHandler.UpdateFlatStatus).Methods("POST")
 
 	return router
 }

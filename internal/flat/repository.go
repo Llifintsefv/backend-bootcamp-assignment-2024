@@ -14,6 +14,7 @@ import (
 type FlatRepository interface {
 	CreateFlat(ctx context.Context,req dto.PostFlatCreateJSONRequestBody) (dto.Flat,error) 
 	GetFlats(ctx context.Context, houseId string) ([]dto.Flat,error)
+	UpdateFlatStatus(ctx context.Context, req dto.PostFlatUpdateJSONRequestBody) (dto.Flat, error)
 }
 
 type flatRepository struct{
@@ -80,4 +81,27 @@ func (r *flatRepository) GetFlats(ctx context.Context, houseId string) ([]dto.Fl
 	}
 
 	return flats, nil
+}
+
+func (r *flatRepository) UpdateFlatStatus(ctx context.Context, req dto.PostFlatUpdateJSONRequestBody) (dto.Flat, error) {
+	var flat dto.Flat
+	stmt,err := r.db.PrepareContext(ctx,"UPDATE flats SET status = $1 WHERE id = $2 RETURNING id,house_id,price,rooms,status")
+	if err != nil {
+		return dto.Flat{}, fmt.Errorf("error preparing query: %w", err)	
+	}
+
+	defer stmt.Close()
+
+	err = stmt.QueryRowContext(ctx,req.Status,req.Id).Scan(&flat.Id,&flat.HouseId,&flat.Price,&flat.Rooms,&flat.Status)
+	if err != nil {
+		var pgErr *pgconn.PgError
+		if errors.As(err, &pgErr) {
+			if pgErr.Code == "23503" { // foreign_key_violation
+				return dto.Flat{}, fmt.Errorf("flat with id %d does not exist", req.Id)
+			}
+		}
+		return dto.Flat{}, fmt.Errorf("error executing query: %w", err)
+	}
+
+	return flat, nil
 }
