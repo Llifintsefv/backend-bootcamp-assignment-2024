@@ -14,6 +14,7 @@ require (
 require (
 	github.com/google/uuid v1.5.0
 	github.com/jackc/pgconn v1.14.3
+	github.com/streadway/amqp v1.1.0
 )
 
 require (

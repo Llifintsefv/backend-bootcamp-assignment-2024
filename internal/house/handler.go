@@ -4,6 +4,9 @@ import (
 	"backend-bootcamp-assignment-2024/dto"
 	"encoding/json"
 	"net/http"
+	"strconv"
+
+	"github.com/gorilla/mux"
 )
 
 type HouseHandler struct {
@@ -44,4 +47,30 @@ func (h *HouseHandler) CreateHouse(w http.ResponseWriter, r *http.Request) {
 
 }
 
+func (h *HouseHandler) Subscribe(w http.ResponseWriter, r *http.Request) {
+	var req dto.Email
 
+	err := json.NewDecoder(r.Body).Decode(&req)
+	if err != nil {
+		http.Error(w, "", http.StatusBadRequest)
+		return
+	}
+	params := mux.Vars(r)
+
+	houseId, err := strconv.Atoi(params["id"])
+	if err != nil {
+		http.Error(w, "", http.StatusBadRequest)
+		return
+	}
+
+	ctx := r.Context()
+
+	err = h.houseService.Subscribe(ctx, houseId, req)
+	if err != nil {
+		http.Error(w, "", http.StatusInternalServerError)
+		return
+	}
+
+	w.WriteHeader(http.StatusOK)
+
+}

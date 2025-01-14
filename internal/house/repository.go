@@ -8,6 +8,8 @@ import (
 
 type HouseRepository interface {
 	CreateHouse(ctx context.Context, req dto.PostHouseCreateJSONRequestBody) (dto.House, error)
+	Subscribe(ctx context.Context, houseId int, req dto.Email) error
+	GetEmailsByHouseID(ctx context.Context, houseId int) ([]dto.Email, error)
 }
 
 type houseRepository struct {
@@ -45,3 +47,44 @@ func (r *houseRepository) CreateHouse(ctx context.Context, req dto.PostHouseCrea
 	return house, nil
 }
 
+func (r *houseRepository) Subscribe(ctx context.Context, houseId int, req dto.Email) error {
+	stmt, err := r.db.PrepareContext(ctx, "INSERT INTO subscriptions (house_id,email) VALUES ($1,$2)")
+	if err != nil {
+		return err
+	}
+
+	defer stmt.Close()
+
+	_, err = stmt.ExecContext(ctx, houseId, req)
+	if err != nil {
+		return err
+	}
+
+	return nil
+}
+
+func (r *houseRepository) GetEmailsByHouseID(ctx context.Context, houseId int) ([]dto.Email, error) {
+	var emails []dto.Email
+	stmt, err := r.db.PrepareContext(ctx, "SELECT email FROM subscriptions WHERE house_id = $1")
+	if err != nil {
+		return nil, err
+	}
+
+	defer stmt.Close()
+
+	rows, err := stmt.QueryContext(ctx, houseId)
+	if err != nil {
+		return nil, err
+	}
+
+	for rows.Next() {
+		var email dto.Email
+		err = rows.Scan(&email)
+		if err != nil {
+			return nil, err
+		}
+		emails = append(emails, email)
+	}
+
+	return emails, nil
+}

@@ -27,6 +27,7 @@ CREATE TABLE flats (
 
 
 CREATE TABLE subscriptions (
+    email VARCHAR(255) NOT NULL,
     user_id UUID NOT NULL,
     house_id INTEGER NOT NULL,
     subscribed_at TIMESTAMP WITH TIME ZONE NOT NULL DEFAULT CURRENT_TIMESTAMP,

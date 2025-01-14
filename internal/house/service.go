@@ -7,6 +7,7 @@ import (
 
 type HouseService interface {
 	CreateHouse(ctx context.Context, req dto.PostHouseCreateJSONRequestBody) (dto.House, error)
+	Subscribe(ctx context.Context, houseId int, req dto.Email) error
 }
 
 type houseService struct {
@@ -26,4 +27,12 @@ func (s *houseService) CreateHouse(ctx context.Context, req dto.PostHouseCreateJ
 	}
 
 	return house, nil
+}
+
+func (s *houseService) Subscribe(ctx context.Context, houseId int, req dto.Email) error {
+	err := s.houseRepository.Subscribe(ctx, houseId, req)
+	if err != nil {
+		return err
+	}
+	return nil
 }
