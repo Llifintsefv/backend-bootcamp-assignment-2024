@@ -19,19 +19,19 @@ func main() {
 	cfg := config.NewConfig()
 	db, err := db.NewDB(cfg.DBConnStr)
 	if err != nil {
-		log.Fatal(err)
+		log.Fatalf("failed to connect to database: %v", err)
 	}
 	defer db.Close()
 
 	ch, err := notification.InitRabbitMQ()
 	if err != nil {
-		log.Fatal(err)
+		log.Fatalf("failed to initialize RabbitMQ: %v", err)
 	}
 	defer ch.Close()
 
 	publisher, err := notification.NewPublisher(ch)
 	if err != nil {
-		log.Fatal(err)
+		log.Fatalf("failed to create RabbitMQ publisher: %v", err)
 	}
 
 	authRepository := auth.NewAuthRepository(db)
@@ -56,8 +56,9 @@ func main() {
 
 	go subscriber.StartConsuming(ctx)
 
-	fmt.Println("Server is running on port 8080")
+	fmt.Println("Server is running on port ", cfg.Port)
 	if err := http.ListenAndServe(cfg.Port, router); err != nil {
-		log.Fatal(err)
+		log.Fatalf("failed to start server: %v", err)
 	}
+
 }

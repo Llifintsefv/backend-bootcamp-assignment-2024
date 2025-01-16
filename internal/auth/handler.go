@@ -52,14 +52,14 @@ func (h *AuthHandler) Register(w http.ResponseWriter, r *http.Request) {
 	}
 
 	if req.Password == nil {
-		http.Error(w, "Invalid request body", http.StatusBadRequest)
+		http.Error(w, "Password field is required", http.StatusBadRequest)
 		return
 	}
 	ctx := r.Context()
 
 	userUUID, err := h.service.registerUser(ctx, req)
 	if err != nil {
-		http.Error(w, "", http.StatusInternalServerError)
+		http.Error(w, "Failed to register user", http.StatusInternalServerError)
 		return
 	}
 
@@ -78,7 +78,7 @@ func (h *AuthHandler) Login(w http.ResponseWriter, r *http.Request) {
 	}
 
 	if req.Id == &uuid.Nil || req.Password == nil {
-		http.Error(w, "invalid request body", http.StatusBadRequest)
+		http.Error(w, "ID and password fields are required", http.StatusBadRequest)
 		return
 	}
 
@@ -87,7 +87,7 @@ func (h *AuthHandler) Login(w http.ResponseWriter, r *http.Request) {
 	token, err := h.service.loginUser(ctx, req)
 
 	if err != nil {
-		http.Error(w, "", http.StatusInternalServerError)
+		http.Error(w, "Failed to log in user", http.StatusInternalServerError)
 		return
 	}
 

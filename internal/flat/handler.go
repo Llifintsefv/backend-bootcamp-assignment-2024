@@ -25,7 +25,7 @@ func (h *FlatHandler) CreateFlat(w http.ResponseWriter, r *http.Request) {
 	}
 
 	if req.Price <= 0 || *req.Rooms <= 0 {
-		http.Error(w, "invalid request body", http.StatusBadRequest)
+		http.Error(w, "Price and rooms must be positive numbers", http.StatusBadRequest)
 		return
 	}
 
@@ -33,7 +33,7 @@ func (h *FlatHandler) CreateFlat(w http.ResponseWriter, r *http.Request) {
 
 	flatCreateResponse, err := h.flatService.CreateFlat(ctx, req)
 	if err != nil {
-		http.Error(w, "internal server error", http.StatusInternalServerError)
+		http.Error(w, "Failed to create flat", http.StatusInternalServerError)
 		return
 	}
 
@@ -51,7 +51,7 @@ func (h *FlatHandler) GetFlats(w http.ResponseWriter, r *http.Request) {
 
 	flatGetResponse, err := h.flatService.GetFlats(ctx, houseId)
 	if err != nil {
-		http.Error(w, "internal server error", http.StatusInternalServerError)
+		http.Error(w, "Failed to get flats", http.StatusInternalServerError)
 		return
 	}
 
@@ -69,7 +69,7 @@ func (h *FlatHandler) UpdateFlatStatus(w http.ResponseWriter, r *http.Request) {
 	}
 
 	if *req.Status == "" && *req.Status != "created" && *req.Status != "updated" && *req.Status != "declined" && *req.Status != "on moderation" {
-		http.Error(w, "invalid request body", http.StatusBadRequest)
+		http.Error(w, "Invalid status value", http.StatusBadRequest)
 		return
 	}
 
@@ -77,7 +77,7 @@ func (h *FlatHandler) UpdateFlatStatus(w http.ResponseWriter, r *http.Request) {
 
 	flatUpdateResponse, err := h.flatService.UpdateFlatStatus(ctx, req)
 	if err != nil {
-		http.Error(w, "internal server error", http.StatusInternalServerError)
+		http.Error(w, "Failed to update flat status", http.StatusInternalServerError)
 		return
 	}
 

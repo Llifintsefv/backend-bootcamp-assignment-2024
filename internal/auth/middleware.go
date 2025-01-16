@@ -11,7 +11,6 @@ import (
 )
 
 type JWTClaims struct {
-	exp  int64  `json:"exp"`
 	Type string `json:"user_type"`
 	jwt.RegisteredClaims
 }
@@ -21,24 +20,23 @@ func AuthMiddleware(secretKey []byte) func(next http.Handler) http.Handler {
 		return http.HandlerFunc(func(w http.ResponseWriter, r *http.Request) {
 			token := r.Header.Get("Authorization")
 			if token == "" {
-				http.Error(w, "Unauthorized dsd", http.StatusUnauthorized)
+				http.Error(w, "Authorization token is missing", http.StatusUnauthorized)
 				return
 			}
 			headerPart := strings.Split(token, " ")
 			if len(headerPart) != 2 || headerPart[0] != "Bearer" {
-				http.Error(w, "Unauthorized vav", http.StatusUnauthorized)
+				http.Error(w, "Invalid authorization token format", http.StatusUnauthorized)
 				return
 			}
 			tokenString := headerPart[1]
 
 			claims, err := validateToken(tokenString, secretKey)
 			if err != nil {
-				http.Error(w, "Unauthorized huz", http.StatusUnauthorized)
+				http.Error(w, "Invalid or expired authorization token", http.StatusUnauthorized)
 				return
 			}
 
-			ctx := context.WithValue(r.Context(), "user_id", claims.exp)
-			ctx = context.WithValue(ctx, "user_type", claims.Type)
+			ctx := context.WithValue(r.Context(), "user_type", claims.Type)
 			next.ServeHTTP(w, r.WithContext(ctx))
 		})
 	}
@@ -71,7 +69,7 @@ func ModeratorMiddleware(next http.Handler) http.Handler {
 			return
 		}
 		if userType != "moderator" {
-			http.Error(w, "Forbidden", http.StatusForbidden)
+			http.Error(w, "Insufficient permissions", http.StatusForbidden)
 			return
 		}
 		next.ServeHTTP(w, r)

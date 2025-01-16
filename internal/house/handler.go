@@ -24,12 +24,12 @@ func (h *HouseHandler) CreateHouse(w http.ResponseWriter, r *http.Request) {
 
 	err := json.NewDecoder(r.Body).Decode(&req)
 	if err != nil {
-		http.Error(w, "", http.StatusBadRequest)
+		http.Error(w, "Invalid request body", http.StatusBadRequest)
 		return
 	}
 
 	if req.Address == "" || req.Year <= 0 {
-		http.Error(w, "", http.StatusBadRequest)
+		http.Error(w, "Address and year are required", http.StatusBadRequest)
 		return
 	}
 
@@ -38,7 +38,7 @@ func (h *HouseHandler) CreateHouse(w http.ResponseWriter, r *http.Request) {
 	houseResponse, err := h.houseService.CreateHouse(ctx, req)
 
 	if err != nil {
-		http.Error(w, "", http.StatusInternalServerError)
+		http.Error(w, "Failed to create house", http.StatusInternalServerError)
 		return
 	}
 
@@ -52,14 +52,14 @@ func (h *HouseHandler) Subscribe(w http.ResponseWriter, r *http.Request) {
 
 	err := json.NewDecoder(r.Body).Decode(&req)
 	if err != nil {
-		http.Error(w, "", http.StatusBadRequest)
+		http.Error(w, "Invalid request body", http.StatusBadRequest)
 		return
 	}
 	params := mux.Vars(r)
 
 	houseId, err := strconv.Atoi(params["id"])
 	if err != nil {
-		http.Error(w, "", http.StatusBadRequest)
+		http.Error(w, "Invalid house ID", http.StatusBadRequest)
 		return
 	}
 
@@ -67,7 +67,7 @@ func (h *HouseHandler) Subscribe(w http.ResponseWriter, r *http.Request) {
 
 	err = h.houseService.Subscribe(ctx, houseId, req)
 	if err != nil {
-		http.Error(w, "", http.StatusInternalServerError)
+		http.Error(w, "Failed to subscribe", http.StatusInternalServerError)
 		return
 	}
 
