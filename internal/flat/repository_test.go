@@ -3,6 +3,7 @@ package flat
 import (
 	"backend-bootcamp-assignment-2024/dto"
 	"context"
+	"fmt"
 	"testing"
 
 	"github.com/DATA-DOG/go-sqlmock"
@@ -101,4 +102,70 @@ func Test_CreateFlat(t *testing.T) {
 		assert.NoError(t, mock.ExpectationsWereMet())
 
 	})
+}
+
+
+func Test_GetFlat(t *testing.T) {
+	t.Run("success", func(t *testing.T) {
+		db,mock,err := sqlmock.New()
+		if err != nil {
+			t.Fatalf("an error '%s' was not expected when opening a stub database connection", err)
+		}
+
+		defer db.Close()
+
+		repo := NewFlatRepository(db)
+
+		houseId := "1"
+		expectedFlats := []dto.Flat{
+		{Id: 1, HouseId: 1, Price: 100000, Rooms: 2, Status: "created"},
+		{Id: 2, HouseId: 1, Price: 150000, Rooms: 3, Status: "booked"},
+		}
+
+	
+		rows := sqlmock.NewRows([]string{"id", "house_id", "price", "rooms", "status"}).
+		AddRow(expectedFlats[0].Id, expectedFlats[0].HouseId, expectedFlats[0].Price, expectedFlats[0].Rooms, expectedFlats[0].Status).
+		AddRow(expectedFlats[1].Id, expectedFlats[1].HouseId, expectedFlats[1].Price, expectedFlats[1].Rooms, expectedFlats[1].Status)
+
+		mock.ExpectPrepare("SELECT id,house_id,price,rooms,status FROM flats WHERE house_id = \\$1").
+		ExpectQuery().
+		WithArgs(houseId).
+		WillReturnRows(rows)
+
+		actualFlats, err := repo.GetFlats(context.Background(), houseId)
+		
+		assert.NoError(t, err)
+		assert.Equal(t, expectedFlats, actualFlats)
+		assert.NoError(t, mock.ExpectationsWereMet())
+
+	})
+
+	t.Run("DBerror", func(t *testing.T) {
+		db, mock, err := sqlmock.New()
+		if err != nil {
+			t.Fatalf("an error '%s' was not expected when opening a stub database connection", err)
+		}
+		defer db.Close()
+
+		repo := NewFlatRepository(db)
+
+		houseId := "1"
+
+
+		mock.ExpectPrepare("SELECT id,house_id,price,rooms,status FROM flats WHERE house_id = \\$1").
+			ExpectQuery().
+			WithArgs(houseId).
+			WillReturnError(fmt.Errorf("some database error"))
+
+		_, err = repo.GetFlats(context.Background(), houseId)
+
+		assert.Error(t, err)
+		assert.EqualError(t, err, "error executing query: some database error")
+
+		if err := mock.ExpectationsWereMet(); err != nil {
+			t.Errorf("there were unfulfilled expectations: %s", err)
+		}
+
+	})
+	
 }
