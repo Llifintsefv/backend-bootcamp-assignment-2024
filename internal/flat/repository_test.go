@@ -252,3 +252,4 @@ func Test_UpdateFlatStatus(t *testing.T) {
 		assert.NoError(t, mock.ExpectationsWereMet())
 	})
 }
+
